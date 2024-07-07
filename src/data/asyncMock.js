@@ -23,7 +23,7 @@ export const productos = [
       precio: 60000,
       categoria: "Prenda superior",
       stock: 10,
-      descripcion: "Un polerón con capucha con capucha para mantenerte abrigado y mantener todo el estilo.",
+      descripcion: "Un polerón con capucha para mantenerte abrigado y derrochar estilo.",
       img: "https://i.ebayimg.com/thumbs/images/g/fpAAAOSwPChjLW~R/s-l640.jpg",
     },
     {
