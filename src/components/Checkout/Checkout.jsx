@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Context from '../../context/CartContext'
 import {
     FormControl,
@@ -35,7 +35,7 @@ const Checkout = () => {
         phone: ''
     })
     const [ error, setError ] = useState({})
-    const [ loading, setLoading ] = useState(false)
+    const [disableCheckout, setDisableCheckout] = useState(false)
 
 
 
@@ -82,6 +82,36 @@ const Checkout = () => {
     }
 
 
+    const checkStock = async () => {
+        for (const item of cart) {
+            const docRef = doc(db, 'productos', item.id)
+            const productDoc = await getDoc(docRef)
+            const currentStock = productDoc.data().stock
+
+
+            if (currentStock < item.quantity) {
+                return false
+            }
+        }
+        return true
+    }
+
+
+    useEffect(() => {
+        const updateStockStatus = async () => {
+            const stockStatus = await checkStock()
+            setDisableCheckout(!stockStatus)
+        }
+        updateStockStatus()
+    }, [cart])
+
+
+
+
+
+
+
+
 
 
     const getOrder = async () => {
@@ -91,15 +121,24 @@ const Checkout = () => {
         if (cart.length === 0) {
             Swal.fire({
                 title: "Carrito vacío",
-                text: `carrito vacío`,
+                text: `Carrito vacío`,
                 icon: "error",
                 confirmButtonText: "Ir al inicio"}).then(() => {
                     navigate('/')
                 });
             return
+        } if (!(await checkStock())) {
+            Swal.fire({
+                title: "Stock Insuficiente",
+                text: `Uno o más productos no tienen suficiente stock`,
+                icon: "error",
+                confirmButtonText: "Aceptar"
+            })
+            return
         }
 
 
+       
 
 
         const coleccion = collection(db, 'orders')
@@ -117,7 +156,7 @@ const Checkout = () => {
                 } else {
                     Swal.fire({
                         title: "Producto sin stock",
-                        text: `sin stock suficiente de ${item.nombre}`,
+                        text: `Sin stock suficiente de ${item.nombre}`,
                         icon: "error",
                         confirmButtonText: "Aceptar"})
                 }
@@ -150,7 +189,7 @@ const Checkout = () => {
 
 
             Swal.fire({
-                title: "Gracias por tu compra, te esperamos de vuelta",
+                title: "Gracias por tu compra, te esperamos pronto de nuevo.",
                 text: `El número de orden es: ${orderRef.id}`,
                 icon: "success",
                 confirmButtonText: "Ir al inicio",
@@ -209,7 +248,7 @@ const Checkout = () => {
                     <Input
                         type='text'
                         name='phone'
-                        placeholder='3232323'
+                        placeholder='11221122'
                         onChange={updateUser}
                         />
                 </FormControl>
